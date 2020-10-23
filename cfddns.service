@@ -1,0 +1,15 @@
+[Unit]
+Description=Cloudflare DDNS Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+PIDFile=/run/cfddns.pid
+
+#Environment=CF_API_KEY=APIKEYFORCF
+#Environment=CF_API_EMAIL=user@example.com
+#ExecStart=/usr/local/bin/cfddns --zone example.com --name www
+
+[Install]
+WantedBy=multi-user.target
