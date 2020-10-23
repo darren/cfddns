@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"strings"
 	"time"
@@ -54,7 +55,14 @@ func initResolver(host string) {
 			d := net.Dialer{
 				Timeout: time.Millisecond * time.Duration(10000),
 			}
-			for _, server := range dnsServers {
+
+			servers := make([]string, len(dnsServers))
+			perm := rand.Perm(len(dnsServers))
+			for i, v := range perm {
+				servers[v] = dnsServers[i]
+			}
+
+			for _, server := range servers {
 				conn, err := d.DialContext(ctx, "udp", server)
 				if err == nil {
 					return conn, nil
