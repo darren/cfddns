@@ -14,7 +14,7 @@ var name = flag.String("name", "", "hostname to update, like www without example
 var ipv4 = flag.String("ipv4", "", "ipv4 to update, if emtpy guess ipv4 address from system, use no to skip ipv4 update")
 var ipv6 = flag.String("ipv6", "", "ipv6 to update, if emtpy guess ipv6 address from system, use no to skip ipv6 update")
 var duration = flag.Duration("duration", time.Minute, "interval to update")
-var dnsResolver = flag.String("resolver", "1.1.1.1,8.8.8.8,9.9.9.9", "resolver to use to check before update, if empty, use system resolver")
+var dnsResolver = flag.String("resolver", "", "resolver to use to check before update, if empty, use system resolver")
 
 func main() {
 	flag.Parse()
