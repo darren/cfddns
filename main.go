@@ -8,6 +8,7 @@ import (
 )
 
 var key = flag.String("key", os.Getenv("CF_API_KEY"), "the cloudflare api key")
+var token = flag.String("token", os.Getenv("CF_API_TOKEN"), "the cloudflare api token")
 var email = flag.String("email", os.Getenv("CF_API_EMAIL"), "the cloudflare api email")
 var zone = flag.String("zone", "", "the zone name, like example.com")
 var name = flag.String("name", "", "hostname to update, like www without example.com")
@@ -19,15 +20,19 @@ var dnsResolver = flag.String("resolver", "", "resolver to use to check before u
 func main() {
 	flag.Parse()
 
-	if *key == "" || *email == "" {
-		log.Fatalf("key or email is empty")
+	if *key == "" && *token == "" {
+		log.Fatalf("key or token is empty")
+	}
+
+	if *key != "" && *email == "" {
+		log.Fatalf("email can not be empty while key is used")
 	}
 
 	if *zone == "" || *name == "" {
 		log.Fatalf("zone or name not specified")
 	}
 
-	client, err := NewClient(*key, *email, *zone)
+	client, err := NewClient(*key, *token, *email, *zone)
 	if err != nil {
 		log.Fatal(err)
 	}

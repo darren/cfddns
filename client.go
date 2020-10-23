@@ -15,11 +15,26 @@ type Client struct {
 }
 
 // NewClient create the Client
-func NewClient(key, email, name string) (*Client, error) {
-	api, err := cloudflare.New(key, email)
-	if err != nil {
-		return nil, err
+func NewClient(key, token, email, name string) (*Client, error) {
+	if key == "" && token == "" {
+		return nil, fmt.Errorf("key or token is empty")
 	}
+
+	var api *cloudflare.API
+	var err error
+
+	if key != "" {
+		api, err = cloudflare.New(key, email)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		api, err = cloudflare.NewWithAPIToken(token)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	zid, err := api.ZoneIDByName(name)
 	if err != nil {
 		return nil, err

@@ -7,8 +7,13 @@ Wants=network-online.target
 Type=simple
 PIDFile=/run/cfddns.pid
 
-#Environment=CF_API_KEY=APIKEYFORCF
+## use key and email
+#Environment=CF_API_KEY=API_KEY_FROM_CF
 #Environment=CF_API_EMAIL=user@example.com
+
+## or use token
+#Environment=CF_API_KEY=API_TOKEN_FROM_CF
+
 #ExecStart=/usr/local/bin/cfddns --zone example.com --name www
 
 [Install]
