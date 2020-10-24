@@ -121,17 +121,18 @@ func (c *Client) update(name, address, rtype string) error {
 		if err != nil {
 			return fmt.Errorf("Update record for %s %s failed %w", name, rid, err)
 		}
-	}
-	_, err = c.api.CreateDNSRecord(
-		c.zid,
-		cloudflare.DNSRecord{
-			Name:    name,
-			Type:    rtype,
-			Content: address,
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("Create record for %s failed %w", name, err)
+	} else {
+		_, err = c.api.CreateDNSRecord(
+			c.zid,
+			cloudflare.DNSRecord{
+				Name:    name,
+				Type:    rtype,
+				Content: address,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("Create record for %s failed %w", name, err)
+		}
 	}
 	return nil
 }
