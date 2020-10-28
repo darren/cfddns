@@ -16,5 +16,8 @@ PIDFile=/run/cfddns.pid
 
 #ExecStart=/usr/local/bin/cfddns --zone example.com --name www
 
+Restart=on-failure
+RestartSec=1m
+
 [Install]
 WantedBy=multi-user.target
