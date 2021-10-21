@@ -51,30 +51,38 @@ func main() {
 	}
 
 	for {
-		if *ipv4 != "no" {
-			ip, err := LocalIP("IPv4")
-			if err == nil {
-				err = client.UpdateIPv4(ctx, *name, ip.String())
-				if err != nil {
-					log.Println(err)
-				} else {
-					log.Printf("Update %s ipv4 to %s ok", *name, ip.String())
-				}
+		select {
+		case <-ctx.Done():
+			log.Printf("Quiting...")
+			return
+		case <-time.After(*duration):
+			run(ctx, client)
+		}
+	}
+}
+
+func run(ctx context.Context, client *Client) {
+	if *ipv4 != "no" {
+		ip, err := LocalIP("IPv4")
+		if err == nil {
+			err = client.UpdateIPv4(ctx, *name, ip.String())
+			if err != nil {
+				log.Println(err)
+			} else {
+				log.Printf("Update %s ipv4 to %s ok", *name, ip.String())
 			}
 		}
+	}
 
-		if *ipv6 != "no" {
-			ip, err := LocalIP("IPv6")
-			if err == nil {
-				err = client.UpdateIPv6(ctx, *name, ip.String())
-				if err != nil {
-					log.Println(err)
-				} else {
-					log.Printf("Update %s ipv6 to %s ok", *name, ip.String())
-				}
+	if *ipv6 != "no" {
+		ip, err := LocalIP("IPv6")
+		if err == nil {
+			err = client.UpdateIPv6(ctx, *name, ip.String())
+			if err != nil {
+				log.Println(err)
+			} else {
+				log.Printf("Update %s ipv6 to %s ok", *name, ip.String())
 			}
 		}
-
-		time.Sleep(*duration)
 	}
 }
