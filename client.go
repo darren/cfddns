@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -48,13 +49,13 @@ func NewClient(key, token, email, name string) (*Client, error) {
 }
 
 // UpdateIPv4 update ipv4 record for name
-func (c *Client) UpdateIPv4(name, address string) error {
-	return c.update(name, address, "A")
+func (c *Client) UpdateIPv4(ctx context.Context, name, address string) error {
+	return c.update(ctx, name, address, "A")
 }
 
 // UpdateIPv6 update ipv6 record for name
-func (c *Client) UpdateIPv6(name, address string) error {
-	return c.update(name, address, "AAAA")
+func (c *Client) UpdateIPv6(ctx context.Context, name, address string) error {
+	return c.update(ctx, name, address, "AAAA")
 }
 
 func (c *Client) fqdn(name string) string {
@@ -74,13 +75,14 @@ func (c *Client) check(name, address, rtype string) bool {
 	return false
 }
 
-func (c *Client) update(name, address, rtype string) error {
+func (c *Client) update(ctx context.Context, name, address, rtype string) error {
 	fqdn := c.fqdn(name)
 	if c.check(name, address, rtype) {
 		return fmt.Errorf("%s %s is up to date", fqdn, address)
 	}
 
 	rr, err := c.api.DNSRecords(
+		ctx,
 		c.zid,
 		cloudflare.DNSRecord{
 			Name: fqdn,
@@ -110,6 +112,7 @@ func (c *Client) update(name, address, rtype string) error {
 		}
 
 		err = c.api.UpdateDNSRecord(
+			ctx,
 			c.zid,
 			rid,
 			cloudflare.DNSRecord{
@@ -119,10 +122,11 @@ func (c *Client) update(name, address, rtype string) error {
 			},
 		)
 		if err != nil {
-			return fmt.Errorf("Update record for %s %s failed %w", name, rid, err)
+			return fmt.Errorf("update record for %s %s failed %w", name, rid, err)
 		}
 	} else {
 		_, err = c.api.CreateDNSRecord(
+			ctx,
 			c.zid,
 			cloudflare.DNSRecord{
 				Name:    name,
@@ -131,7 +135,7 @@ func (c *Client) update(name, address, rtype string) error {
 			},
 		)
 		if err != nil {
-			return fmt.Errorf("Create record for %s failed %w", name, err)
+			return fmt.Errorf("create record for %s failed %w", name, err)
 		}
 	}
 	return nil

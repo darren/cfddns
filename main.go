@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -19,6 +22,9 @@ var dnsResolver = flag.String("resolver", "", "resolver to use to check before u
 
 func main() {
 	flag.Parse()
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	if *key == "" && *token == "" {
 		log.Fatalf("key or token is empty")
@@ -48,7 +54,7 @@ func main() {
 		if *ipv4 != "no" {
 			ip, err := LocalIP("IPv4")
 			if err == nil {
-				err = client.UpdateIPv4(*name, ip.String())
+				err = client.UpdateIPv4(ctx, *name, ip.String())
 				if err != nil {
 					log.Println(err)
 				} else {
@@ -60,7 +66,7 @@ func main() {
 		if *ipv6 != "no" {
 			ip, err := LocalIP("IPv6")
 			if err == nil {
-				err = client.UpdateIPv6(*name, ip.String())
+				err = client.UpdateIPv6(ctx, *name, ip.String())
 				if err != nil {
 					log.Println(err)
 				} else {
