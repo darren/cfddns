@@ -1,4 +1,10 @@
-## cfddns: a simple ddns update agent for cloudflare
+# cfddns: a simple ddns update agent for cloudflare
+
+## Build
+
+```
+go build -o cfddns ./cmd/cfddns
+```
 
 ## Usage
 

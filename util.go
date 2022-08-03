@@ -1,4 +1,4 @@
-package main
+package cfddns
 
 import (
 	"context"
@@ -35,7 +35,7 @@ func LocalIP(rtype string) (net.IP, error) {
 
 var resolver = &net.Resolver{}
 
-func initResolver(host string) {
+func InitResolver(host string) {
 	dnsServers := strings.FieldsFunc(host, func(r rune) bool {
 		if r == ',' || r == ' ' || r == ';' {
 			return true
