@@ -104,12 +104,13 @@ func (c *Client) update(ctx context.Context, name, address, rtype string) error 
 			rid = r.ID
 			oaddress = r.Content
 		}
-		log.Printf("%v in current cloudflare zone: %v %v\n", r.Name, r.Content, r.Type)
+		log.Printf("%v in current cloudflare zone: %v (resolved:%v) %v\n", r.Name, r.Content, address, r.Type)
 	}
 
 	if ok {
 		if oaddress == address {
-			return fmt.Errorf("%s not changed: %s", c.fqdn(name), address)
+			log.Printf("%s not changed: %s", c.fqdn(name), address)
+			return nil
 		}
 
 		err = c.api.UpdateDNSRecord(
@@ -124,6 +125,8 @@ func (c *Client) update(ctx context.Context, name, address, rtype string) error 
 		)
 		if err != nil {
 			return fmt.Errorf("update record for %s %s failed %w", name, rid, err)
+		} else {
+			log.Printf("update record for %s %s ok", name, rid)
 		}
 	} else {
 		_, err = c.api.CreateDNSRecord(
@@ -137,6 +140,8 @@ func (c *Client) update(ctx context.Context, name, address, rtype string) error 
 		)
 		if err != nil {
 			return fmt.Errorf("create record for %s failed %w", name, err)
+		} else {
+			log.Printf("created record for %s", name)
 		}
 	}
 	return nil
