@@ -66,14 +66,13 @@ func Run() {
 		log.Println("Using system resolver to check")
 	}
 
+	err = run(ctx, client)
+	if err != nil {
+		log.Printf("initial run failed: %v", err)
+	}
+
 	backoff := 1 * time.Minute
-
 	for {
-		err = run(ctx, client)
-		if err != nil {
-			log.Printf("initial run failed: %v", err)
-		}
-
 		select {
 		case <-ctx.Done():
 			log.Printf("Quiting...")

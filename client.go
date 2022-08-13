@@ -63,21 +63,23 @@ func (c *Client) fqdn(name string) string {
 }
 
 // check whether ip is up to date
-func (c *Client) check(name, address, rtype string) bool {
+func (c *Client) check(name, address, rtype string) (string, bool) {
 	fqdn := c.fqdn(name)
 	ip, err := Resolve(fqdn, rtype)
 	if err != nil {
 		log.Println(err)
 	}
 	if ip == address {
-		return true
+		return ip, true
 	}
-	return false
+	return ip, false
 }
 
 func (c *Client) update(ctx context.Context, name, address, rtype string) error {
 	fqdn := c.fqdn(name)
-	if c.check(name, address, rtype) {
+	var resolvedAddress string
+	var upToDate bool
+	if resolvedAddress, upToDate = c.check(name, address, rtype); upToDate {
 		log.Printf("%s %s is up to date", fqdn, address)
 		return nil
 	}
@@ -104,7 +106,11 @@ func (c *Client) update(ctx context.Context, name, address, rtype string) error 
 			rid = r.ID
 			oaddress = r.Content
 		}
-		log.Printf("%v in current cloudflare zone: %v (resolved:%v) %v\n", r.Name, r.Content, address, r.Type)
+		log.Printf("%v of %v\n cloudflare: %v \n local:      %v \n resolved:   %s",
+			r.Name, r.Type, r.Content,
+			address,
+			resolvedAddress,
+		)
 	}
 
 	if ok {
@@ -124,9 +130,9 @@ func (c *Client) update(ctx context.Context, name, address, rtype string) error 
 			},
 		)
 		if err != nil {
-			return fmt.Errorf("update record for %s %s failed %w", name, rid, err)
+			return fmt.Errorf("update record for %s failed %w", name, err)
 		} else {
-			log.Printf("update record for %s %s ok", name, rid)
+			log.Printf("update record for %s ok", name)
 		}
 	} else {
 		_, err = c.api.CreateDNSRecord(
