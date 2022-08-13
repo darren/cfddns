@@ -108,7 +108,8 @@ func (c *Client) update(ctx context.Context, name, address, rtype string) error 
 
 	if ok {
 		if oaddress == address {
-			return fmt.Errorf("%s not changed: %s", c.fqdn(name), address)
+			log.Printf("%s not changed: %s", c.fqdn(name), address)
+			return nil
 		}
 
 		err = c.api.UpdateDNSRecord(
