@@ -82,10 +82,19 @@ func Run() {
 			err = run(ctx, client)
 			if err != nil {
 				log.Printf("%s, retry after: %v", err, backoff)
-				time.Sleep(backoff)
+				sleepWithContext(ctx, backoff)
 				backoff *= 2
 			}
 		}
+	}
+}
+
+func sleepWithContext(ctx context.Context, d time.Duration) {
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(d):
+		return
 	}
 }
 
@@ -96,8 +105,6 @@ func run(ctx context.Context, client *Client) error {
 			err = client.UpdateIPv4(ctx, name, ip.String())
 			if err != nil {
 				return err
-			} else {
-				log.Printf("Update %s ipv4 to %s ok", name, ip.String())
 			}
 		}
 	}
@@ -108,8 +115,6 @@ func run(ctx context.Context, client *Client) error {
 			err = client.UpdateIPv6(ctx, name, ip.String())
 			if err != nil {
 				return err
-			} else {
-				log.Printf("Update %s ipv6 to %s ok", name, ip.String())
 			}
 		}
 	}

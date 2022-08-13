@@ -78,7 +78,8 @@ func (c *Client) check(name, address, rtype string) bool {
 func (c *Client) update(ctx context.Context, name, address, rtype string) error {
 	fqdn := c.fqdn(name)
 	if c.check(name, address, rtype) {
-		return fmt.Errorf("%s %s is up to date", fqdn, address)
+		log.Printf("%s %s is up to date", fqdn, address)
+		return nil
 	}
 
 	rr, err := c.api.DNSRecords(
@@ -108,8 +109,7 @@ func (c *Client) update(ctx context.Context, name, address, rtype string) error 
 
 	if ok {
 		if oaddress == address {
-			log.Printf("%s not changed: %s", c.fqdn(name), address)
-			return nil
+			return fmt.Errorf("%s not changed: %s", c.fqdn(name), address)
 		}
 
 		err = c.api.UpdateDNSRecord(
