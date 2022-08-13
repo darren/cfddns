@@ -50,6 +50,10 @@ func Run() {
 		log.Fatalf("zone or name not specified")
 	}
 
+	if duration < 30*time.Second {
+		log.Fatalf("check interval can not be less thant 30 seconds")
+	}
+
 	client, err := NewClient(key, token, email, zone)
 	if err != nil {
 		log.Fatal(err)
@@ -62,24 +66,36 @@ func Run() {
 		log.Println("Using system resolver to check")
 	}
 
+	backoff := 1 * time.Minute
+
 	for {
+		err = run(ctx, client)
+		if err != nil {
+			log.Printf("initial run failed: %v", err)
+		}
+
 		select {
 		case <-ctx.Done():
 			log.Printf("Quiting...")
 			return
 		case <-time.After(duration):
-			run(ctx, client)
+			err = run(ctx, client)
+			if err != nil {
+				log.Printf("%s, retry after: %v", err, backoff)
+				time.Sleep(backoff)
+				backoff *= 2
+			}
 		}
 	}
 }
 
-func run(ctx context.Context, client *Client) {
+func run(ctx context.Context, client *Client) error {
 	if ipv4 != "no" {
 		ip, err := LocalIP("IPv4")
 		if err == nil {
 			err = client.UpdateIPv4(ctx, name, ip.String())
 			if err != nil {
-				log.Println(err)
+				return err
 			} else {
 				log.Printf("Update %s ipv4 to %s ok", name, ip.String())
 			}
@@ -91,10 +107,11 @@ func run(ctx context.Context, client *Client) {
 		if err == nil {
 			err = client.UpdateIPv6(ctx, name, ip.String())
 			if err != nil {
-				log.Println(err)
+				return err
 			} else {
 				log.Printf("Update %s ipv6 to %s ok", name, ip.String())
 			}
 		}
 	}
+	return nil
 }
